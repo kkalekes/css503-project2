@@ -35,36 +35,35 @@ def draw_hsv(flow):
 
     return bgr
 
-cap = cv2.VideoCapture(0)
+def DenseOpticalFlow(cap):
+    suc, prev = cap.read()
+    prevgray = cv2.cvtColor(prev, cv2.COLOR_BGR2GRAY)
 
-suc, prev = cap.read()
-prevgray = cv2.cvtColor(prev, cv2.COLOR_BGR2GRAY)
+    while True:
 
-while True:
+        suc, img = cap.read()
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    suc, img = cap.read()
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        # start time to calculate FPS
+        start = time.time()
 
-    # start time to calculate FPS
-    start = time.time()
+        flow = cv2.calcOpticalFlowFarneback(prevgray, gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
 
-    flow = cv2.calcOpticalFlowFarneback(prevgray, gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+        prevgray = gray
 
-    prevgray = gray
+        # End time
+        end = time.time()
+        # calculate the FPS for current frame detection
+        fps = 1 / (end-start)
 
-    # End time
-    end = time.time()
-    # calculate the FPS for current frame detection
-    fps = 1 / (end-start)
+        print(f"{fps:.2f} FPS")
 
-    print(f"{fps:.2f} FPS")
+        cv2.imshow('flow', draw_flow(gray, flow))
+        cv2.imshow('flow HSV', draw_hsv(flow))
 
-    cv2.imshow('flow', draw_flow(gray, flow))
-    cv2.imshow('flow HSV', draw_hsv(flow))
+        key = cv2.waitKey(5)
+        if key == ord('q'):
+            break
 
-    key = cv2.waitKey(5)
-    if key == ord('q'):
-        break
-
-cap.release()
-cv2.destroyAllWindows()
+    cap.release()
+    cv2.destroyAllWindows()
